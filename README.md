@@ -1,99 +1,101 @@
-# Gemi Dompet
+<h1 align="center">Gemi Dompet</h1>
+<h6 align="center">A personal finance app for tracking, understanding, and sharing expenses.</h6>
 
-Aplikasi manajemen keuangan pribadi yang modern dan mudah digunakan untuk membantu Anda mengelola pendapatan, pengeluaran, dan dompet Anda.
+<p align="center">
+  <img src="https://github.com/Vinzzztty/gemi-dompet-oss/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" />
+  <img src="https://img.shields.io/github/languages/top/Vinzzztty/gemi-dompet-oss" alt="language" />
+  <img src="https://img.shields.io/github/languages/code-size/Vinzzztty/gemi-dompet-oss" alt="size" />
+  <img src="https://img.shields.io/github/last-commit/Vinzzztty/gemi-dompet-oss" alt="last commit" />
+  <img src="https://img.shields.io/github/license/Vinzzztty/gemi-dompet-oss" alt="license" />
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
+</p>
 
-![Gemi Dompet Dashboard](public/metadata/preview.png)
+## About
 
-## Fitur
+Gemi Dompet is a web app for managing personal finances in one place. Track income and expenses, manage multiple wallets, monitor recurring bills, view reports, and settle shared costs with friends or groups.
 
-Aplikasi ini menyediakan berbagai fitur untuk mempermudah pencatatan keuangan Anda:
+## Features
 
-### 1. Manajemen Dompet
-Kelola berbagai sumber dana Anda dengan mudah:
-- 💳 **Multi-Dompet**: Tambahkan dan kelola banyak dompet (Bank, E-Wallet, Tunai, dll)
-- 📊 **Saldo Real-time**: Pantau saldo terkini dari setiap dompet
-- 📝 **Riwayat Transaksi**: Lihat riwayat transaksi spesifik untuk setiap dompet
+- **Multiple wallets** — manage bank, e-wallet, and cash balances.
+- **Transactions and categories** — record income, expenses, and transfers between wallets.
+- **Financial reports** — review balance summaries, monthly comparisons, and category spending.
+- **Bills** — manage one-off and recurring bills with reminders.
+- **Split bills and group expenses** — create shared-expense sessions, add participants, and view settlement recommendations.
+- **Accounts and security** — cookie-based authentication, password reset, and wallet-balance validation.
 
-### 2. Pencatatan Transaksi
-Catat setiap pemasukan dan pengeluaran dengan detail:
-- 💸 **Pemasukan & Pengeluaran**: Form input yang mudah untuk mencatat transaksi
-- 🏷️ **Kategori Kustom**: Kategorikan transaksi Anda (Makan, Transportasi, Gaji, dll)
-- 📅 **Filter Tanggal**: Filter transaksi berdasarkan periode waktu tertentu
+## Preview
 
-### 3. Laporan & Analisis
-Dapatkan wawasan mendalam tentang keuangan Anda:
-- 📈 **Visualisasi Data**: Grafik interaktif untuk memvisualisasikan arus kas
-- 📋 **Laporan Detail**: Ringkasan pemasukan dan pengeluaran per kategori
-- 💡 **Pemantauan Budget**: Bantu Anda tetap dalam jalur anggaran
+<p align="center">
+  <img src="./public/images/readme/dashboard.png" alt="Gemi Dompet dashboard showing wallet balances, category spending, and transaction history" width="100%" />
+</p>
 
-## Prasyarat
+<p align="center">
+  <img src="./public/images/readme/reports.png" alt="Gemi Dompet reports showing monthly comparison and category spending breakdown" width="100%" />
+</p>
 
-- [Node.js](https://nodejs.org/) (versi 18 atau lebih baru)
-- [PostgreSQL](https://www.postgresql.org/) database
-- [npm](https://www.npmjs.com/) atau package manager lainnya
+## Tech Stack
 
-## Instalasi
+- [Next.js](https://nextjs.org/) 15 and React 19
+- TypeScript and Tailwind CSS
+- Prisma and PostgreSQL
+- Radix UI, Lucide, and Font Awesome
 
-Ikuti langkah-langkah berikut untuk menjalankan proyek ini di mesin lokal Anda:
+## Run Locally
 
-1.  **Clone repositori ini**
-    ```bash
-    git clone https://github.com/username/gemi-dompet.git
-    cd gemi-dompet
-    ```
+### Prerequisites
 
-2.  **Instal dependensi**
-    ```bash
-    npm install
-    ```
+- Node.js 18 or later
+- npm
+- PostgreSQL
 
-3.  **Konfigurasi Environment Variable**
-    Salin file `.env.example` menjadi `.env` dan sesuaikan dengan konfigurasi database Anda:
-    ```bash
-    cp .env.example .env
-    ```
-    Isi `DATABASE_URL` dengan koneksi string PostgreSQL Anda.
-
-4.  **Jalankan Migrasi Database**
-    Siapkan database dengan menjalankan migrasi Prisma:
-    ```bash
-    npx prisma migrate dev
-    ```
-
-5.  **Jalankan Aplikasi**
-    Mulai server pengembangan:
-    ```bash
-    npm run dev
-    ```
-    Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
-
-## Pengembangan
-
-Perintah-perintah berikut tersedia untuk pengembangan:
+### Installation
 
 ```bash
-# Instal dependensi
-npm install
-
-# Jalankan server development
-npm run dev
-
-# Build untuk produksi
-npm run build
-
-# Jalankan migrasi database
-npx prisma migrate dev
-
-# Buka Prisma Studio (GUI Database)
-npx prisma studio
+git clone https://github.com/Vinzzztty/gemi-dompet-oss.git
+cd gemi-dompet-oss
+npm ci
+cp .env.example .env.local
 ```
 
-## Teknologi
+Set your PostgreSQL connection and local secrets in `.env.local`. Never commit environment files.
 
-Dibuat dengan teknologi web modern:
-- **Next.js 15** - Framework React
-- **Tailwind CSS** - Styling
-- **Prisma** - ORM Database
-- **PostgreSQL** - Database
-- **Lucide React** - Ikon
-- **Radix UI** - Komponen UI
+```bash
+npx prisma migrate dev
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Environment Variables
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Connection string PostgreSQL. |
+| `JWT_SECRET` | A random secret with at least 32 characters used to sign sessions. |
+| `RESEND_API_KEY` | Resend API key for password-reset emails. |
+| `RESEND_FROM_EMAIL` | A verified sender email address. |
+| `NEXT_PUBLIC_APP_URL` | Public app URL used in password-reset links. |
+
+## Development Commands
+
+```bash
+npm run dev       # Start the development server
+npm test          # Run unit tests
+npm run build     # Create and validate the production build
+npm run start     # Start the production build
+npx prisma studio # Open Prisma Studio
+```
+
+`npm ci` runs `prisma generate` automatically. After changing the schema, create the appropriate Prisma migration and include it in the pull request.
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow, pull request standards, and verification commands. Report vulnerabilities through [SECURITY.md](./SECURITY.md), not a public issue.
+
+## Security Status
+
+Before deployment, use newly rotated secrets for the database, Resend, and JWT. See the [Open-Source Release Checklist](./docs/OPEN_SOURCE_RELEASE.md) for configuration details and release requirements.
+
+## License
+
+Gemi Dompet is licensed under the [MIT License](./LICENSE).
