@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/github/languages/top/Vinzzztty/gemi-dompet-oss" alt="language" />
   <img src="https://img.shields.io/github/languages/code-size/Vinzzztty/gemi-dompet-oss" alt="size" />
   <img src="https://img.shields.io/github/last-commit/Vinzzztty/gemi-dompet-oss" alt="last commit" />
+  <img src="https://img.shields.io/github/license/Vinzzztty/gemi-dompet-oss" alt="license" />
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
 </p>
 
@@ -84,3 +85,7 @@ Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the wor
 ## Security Status
 
 Before deployment, use newly rotated secrets for the database, Resend, and JWT. See the [Open-Source Release Checklist](./docs/OPEN_SOURCE_RELEASE.md) for configuration details and release requirements.
+
+## License
+
+Gemi Dompet is licensed under the [MIT License](./LICENSE).

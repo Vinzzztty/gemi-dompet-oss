@@ -1,11 +1,10 @@
 # Open-Source Release Checklist
 
-Complete these steps before changing the GitHub repository visibility to public.
+Use this checklist when preparing a public release or deployment.
 
-1. Rotate the database password, Resend API key, and JWT secret that were previously committed. Update deployment secrets only; never add replacements to Git.
-2. Rewrite all Git history to remove `.env.local` and the prior values in `.env.example`, then force-push every affected branch and tag. Ask existing clones to re-clone.
-3. Verify with a secret scanner against the complete history, not only the current branch.
-4. Select and add a license. Repository visibility does not grant reuse rights without one.
-5. Enable GitHub private vulnerability reporting, branch protection, required CI checks, and Dependabot alerts/security updates.
-6. Decide whether to retain XLSX import support. The current `xlsx` npm package has unresolved high-severity advisories; do not process untrusted workbooks in a security-sensitive deployment until it is replaced or isolated.
-7. Configure production-only secrets (`DATABASE_URL`, `JWT_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `NEXT_PUBLIC_APP_URL`) in the hosting provider.
+1. Keep production secrets only in the hosting provider: `DATABASE_URL`, `JWT_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `NEXT_PUBLIC_APP_URL`.
+2. Use `.env.example` only as a placeholder template. Scan the complete Git history before migration or publication, and rotate any exposed credential immediately.
+3. Keep the MIT license, `SECURITY.md`, contribution guidance, issue forms, and pull-request template up to date.
+4. Keep GitHub private vulnerability reporting, Dependabot, secret scanning, and branch protection enabled. Pull requests to `main` must pass CI.
+5. Run `npm test` and `npm run build` before every release.
+6. Review dependency alerts before deployment. The `xlsx` package has unresolved advisories; do not process untrusted workbooks in a security-sensitive deployment until it is replaced or isolated.

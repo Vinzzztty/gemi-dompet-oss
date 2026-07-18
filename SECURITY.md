@@ -7,7 +7,7 @@ Security fixes are applied to the latest code on the default branch.
 ## Reporting a Vulnerability
 
 Do not open a public issue for a suspected vulnerability or exposed credential.
-Use [GitHub private vulnerability reporting](https://github.com/Vinzzztty/gemi_dompet/security/advisories/new) and include reproduction steps, impact, and any suggested mitigation. We will acknowledge reports within seven days and coordinate a fix before public disclosure.
+Use [GitHub private vulnerability reporting](https://github.com/Vinzzztty/gemi-dompet-oss/security/advisories/new) and include reproduction steps, impact, and any suggested mitigation. We will acknowledge reports within seven days and coordinate a fix before public disclosure.
 
 ## Handling Credentials
 
