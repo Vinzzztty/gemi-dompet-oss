@@ -23,6 +23,16 @@ Gemi Dompet is a web app for managing personal finances in one place. Track inco
 - **Split bills and group expenses** — create shared-expense sessions, add participants, and view settlement recommendations.
 - **Accounts and security** — cookie-based authentication, password reset, and wallet-balance validation.
 
+## Preview
+
+<p align="center">
+  <img src="./public/images/readme/dashboard.png" alt="Gemi Dompet dashboard showing wallet balances, category spending, and transaction history" width="100%" />
+</p>
+
+<p align="center">
+  <img src="./public/images/readme/reports.png" alt="Gemi Dompet reports showing monthly comparison and category spending breakdown" width="100%" />
+</p>
+
 ## Tech Stack
 
 - [Next.js](https://nextjs.org/) 15 and React 19
