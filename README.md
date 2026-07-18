@@ -1,5 +1,5 @@
 <h1 align="center">Gemi Dompet</h1>
-<h6 align="center">Aplikasi manajemen keuangan pribadi untuk mencatat, memahami, dan membagikan pengeluaran.</h6>
+<h6 align="center">A personal finance app for tracking, understanding, and sharing expenses.</h6>
 
 <p align="center">
   <img src="https://github.com/Vinzzztty/gemi-dompet-oss/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" />
@@ -9,35 +9,35 @@
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
 </p>
 
-## Tentang
+## About
 
-Gemi Dompet adalah aplikasi web untuk mengelola keuangan pribadi dalam satu tempat. Catat pemasukan dan pengeluaran, kelola beberapa dompet, pantau tagihan berulang, lihat laporan, serta hitung pembagian biaya bersama teman atau grup.
+Gemi Dompet is a web app for managing personal finances in one place. Track income and expenses, manage multiple wallets, monitor recurring bills, view reports, and settle shared costs with friends or groups.
 
-## Fitur
+## Features
 
-- **Multi-dompet** — kelola saldo bank, e-wallet, dan tunai.
-- **Transaksi & kategori** — catat pemasukan, pengeluaran, dan transfer antar-dompet.
-- **Laporan keuangan** — ringkasan saldo, perbandingan bulanan, dan pengeluaran per kategori.
-- **Tagihan** — kelola tagihan dan seri tagihan berulang beserta pengingatnya.
-- **Split bill & talangan grup** — buat sesi berbagi biaya, tambahkan peserta, dan lihat rekomendasi pelunasan.
-- **Akun & keamanan** — autentikasi berbasis cookie, reset password, dan validasi saldo dompet.
+- **Multiple wallets** — manage bank, e-wallet, and cash balances.
+- **Transactions and categories** — record income, expenses, and transfers between wallets.
+- **Financial reports** — review balance summaries, monthly comparisons, and category spending.
+- **Bills** — manage one-off and recurring bills with reminders.
+- **Split bills and group expenses** — create shared-expense sessions, add participants, and view settlement recommendations.
+- **Accounts and security** — cookie-based authentication, password reset, and wallet-balance validation.
 
-## Teknologi
+## Tech Stack
 
-- [Next.js](https://nextjs.org/) 15 dan React 19
-- TypeScript dan Tailwind CSS
-- Prisma dan PostgreSQL
-- Radix UI, Lucide, dan Font Awesome
+- [Next.js](https://nextjs.org/) 15 and React 19
+- TypeScript and Tailwind CSS
+- Prisma and PostgreSQL
+- Radix UI, Lucide, and Font Awesome
 
-## Menjalankan Secara Lokal
+## Run Locally
 
-### Prasyarat
+### Prerequisites
 
-- Node.js 18 atau lebih baru
+- Node.js 18 or later
 - npm
 - PostgreSQL
 
-### Instalasi
+### Installation
 
 ```bash
 git clone https://github.com/Vinzzztty/gemi-dompet-oss.git
@@ -46,41 +46,41 @@ npm ci
 cp .env.example .env.local
 ```
 
-Isi `.env.local` dengan koneksi PostgreSQL dan secret lokal Anda. Jangan pernah commit file environment.
+Set your PostgreSQL connection and local secrets in `.env.local`. Never commit environment files.
 
 ```bash
 npx prisma migrate dev
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
-### Environment variables
+### Environment Variables
 
-| Variable | Kegunaan |
+| Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | Connection string PostgreSQL. |
-| `JWT_SECRET` | Secret acak minimal 32 karakter untuk menandatangani sesi. |
-| `RESEND_API_KEY` | API key Resend untuk email reset password. |
-| `RESEND_FROM_EMAIL` | Alamat email pengirim yang sudah diverifikasi. |
-| `NEXT_PUBLIC_APP_URL` | URL publik aplikasi, digunakan pada tautan reset password. |
+| `JWT_SECRET` | A random secret with at least 32 characters used to sign sessions. |
+| `RESEND_API_KEY` | Resend API key for password-reset emails. |
+| `RESEND_FROM_EMAIL` | A verified sender email address. |
+| `NEXT_PUBLIC_APP_URL` | Public app URL used in password-reset links. |
 
-## Perintah Pengembangan
+## Development Commands
 
 ```bash
-npm run dev       # Jalankan server development
-npm test          # Jalankan unit test
-npm run build     # Buat dan validasi production build
-npm run start     # Jalankan production build
-npx prisma studio # Buka Prisma Studio
+npm run dev       # Start the development server
+npm test          # Run unit tests
+npm run build     # Create and validate the production build
+npm run start     # Start the production build
+npx prisma studio # Open Prisma Studio
 ```
 
-`npm ci` akan menjalankan `prisma generate` secara otomatis. Setelah mengubah skema, jalankan migrasi Prisma yang sesuai dan sertakan perubahan migration dalam pull request.
+`npm ci` runs `prisma generate` automatically. After changing the schema, create the appropriate Prisma migration and include it in the pull request.
 
-## Berkontribusi
+## Contributing
 
-Kontribusi sangat diterima. Baca [CONTRIBUTING.md](./CONTRIBUTING.md) untuk alur kerja, standar pull request, dan perintah verifikasi. Laporkan kerentanan melalui [SECURITY.md](./SECURITY.md), bukan melalui public issue.
+Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the workflow, pull request standards, and verification commands. Report vulnerabilities through [SECURITY.md](./SECURITY.md), not a public issue.
 
-## Status Keamanan
+## Security Status
 
-Sebelum deployment, gunakan secret baru untuk database, Resend, dan JWT. Untuk detail konfigurasi dan checklist rilis, baca [Open-Source Release Checklist](./docs/OPEN_SOURCE_RELEASE.md).
+Before deployment, use newly rotated secrets for the database, Resend, and JWT. See the [Open-Source Release Checklist](./docs/OPEN_SOURCE_RELEASE.md) for configuration details and release requirements.
