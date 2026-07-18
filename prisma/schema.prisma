@@ -1,0 +1,481 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+
+  @@map("category_type")
+}
+
+/// Status pembayaran tagihan tunggal (instance jatuh tempo).
+enum BillStatus {
+  UNPAID
+  PAID
+
+  @@map("bill_status")
+}
+
+enum SplitBillSessionStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+
+  @@map("split_bill_session_status")
+}
+
+enum GroupExpenseSessionStatus {
+  ACTIVE
+  FROZEN
+  SETTLED
+  ARCHIVED
+
+  @@map("group_expense_session_status")
+}
+
+enum GroupExpenseItemStatus {
+  ACTIVE
+  VOID
+
+  @@map("group_expense_item_status")
+}
+
+enum GroupExpenseSplitMode {
+  EQUAL
+  MANUAL
+
+  @@map("group_expense_split_mode")
+}
+
+enum GroupExpenseSettlementRole {
+  RECEIVABLE
+  PAYABLE
+  SETTLED
+
+  @@map("group_expense_settlement_role")
+}
+
+model UserAccount {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  fullName  String   @map("full_name") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  categories          Category[]
+  incomeTransactions  IncomeTransaction[]
+  expenseTransactions ExpenseTransaction[]
+  transferTransactions TransferTransaction[]
+  wallets             Wallet[]
+  passwordResetTokens PasswordResetToken[]
+  bills               Bill[]
+  recurringBillSeries RecurringBillSeries[]
+  ownedSplitBillSessions SplitBillSession[] @relation("SplitBillOwner")
+  splitBillParticipants SplitBillParticipant[]
+  ownedGroupExpenseSessions GroupExpenseSession[] @relation("GroupExpenseOwner")
+  groupExpenseParticipants GroupExpenseParticipant[]
+  createdGroupExpenseSettlementSnapshots GroupExpenseSettlementSnapshot[] @relation("GroupExpenseSettlementCreatedBy")
+
+  @@map("user_account")
+  @@index([email], name: "idx_user_account_email")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamp()
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  user UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_token")
+  @@index([token], name: "idx_reset_token")
+  @@index([userId], name: "idx_reset_user_id")
+}
+
+model Category {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String       @map("user_id") @db.Uuid
+  name      String       @db.VarChar(100)
+  type      CategoryType
+  icon      String?      @db.VarChar(50) @default("wallet")
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp()
+
+  user                UserAccount          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incomeTransactions  IncomeTransaction[]
+  expenseTransactions ExpenseTransaction[]
+  bills                 Bill[]
+  recurringBillSeries   RecurringBillSeries[]
+
+  @@unique([userId, name, type], name: "user_name_type")
+  @@map("category")
+  @@index([userId], name: "idx_category_user_id")
+  @@index([type], name: "idx_category_type")
+}
+
+model IncomeTransaction {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  walletId    String?  @map("wallet_id") @db.Uuid
+  nama        String?  @db.VarChar(255)
+  nominal     Decimal  @db.Decimal(15, 2)
+  categoryId  String   @map("category_id") @db.Uuid
+  tanggal     DateTime @db.Date
+  catatan     String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  user     UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet   Wallet?     @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  category Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@map("income_transaction")
+  @@index([userId], name: "idx_income_user_id")
+  @@index([walletId], name: "idx_income_wallet_id")
+  @@index([categoryId], name: "idx_income_category_id")
+  @@index([tanggal], name: "idx_income_tanggal")
+}
+
+model ExpenseTransaction {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  walletId    String?  @map("wallet_id") @db.Uuid
+  nama        String?  @db.VarChar(255)
+  nominal     Decimal  @db.Decimal(15, 2)
+  categoryId  String   @map("category_id") @db.Uuid
+  tanggal     DateTime @db.Date
+  catatan     String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  user     UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet              Wallet?     @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  category            Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  bill                Bill?       @relation("BillExpense")
+
+  @@map("expense_transaction")
+  @@index([userId], name: "idx_expense_user_id")
+  @@index([walletId], name: "idx_expense_wallet_id")
+  @@index([categoryId], name: "idx_expense_category_id")
+  @@index([tanggal], name: "idx_expense_tanggal")
+}
+
+model TransferTransaction {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  fromWalletId String   @map("from_wallet_id") @db.Uuid
+  toWalletId   String   @map("to_wallet_id") @db.Uuid
+  amount       Decimal  @db.Decimal(15, 2)
+  date         DateTime @db.Date
+  note         String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromWallet Wallet      @relation("FromWallet", fields: [fromWalletId], references: [id], onDelete: Cascade)
+  toWallet   Wallet      @relation("ToWallet", fields: [toWalletId], references: [id], onDelete: Cascade)
+
+  @@map("transfer_transaction")
+  @@index([userId], name: "idx_transfer_user_id")
+  @@index([fromWalletId], name: "idx_transfer_from_wallet_id")
+  @@index([toWalletId], name: "idx_transfer_to_wallet_id")
+  @@index([date], name: "idx_transfer_date")
+}
+
+model Wallet {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  namaDompet  String   @map("nama_dompet") @db.VarChar(255)
+  norek       String?  @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  user                UserAccount           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incomeTransactions  IncomeTransaction[]
+  expenseTransactions ExpenseTransaction[]
+  outgoingTransfers   TransferTransaction[] @relation("FromWallet")
+  incomingTransfers   TransferTransaction[] @relation("ToWallet")
+
+  @@map("wallet")
+  @@index([userId], name: "idx_wallet_user_id")
+}
+
+/// Satu sesi split bill dengan join code publik yang bisa dibagikan owner ke member.
+model SplitBillSession {
+  id          String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerUserId String                 @map("owner_user_id") @db.Uuid
+  sessionCode String                 @unique @map("session_code") @db.VarChar(64)
+  title       String                 @db.VarChar(255)
+  totalAmount Decimal                @map("total_amount") @db.Decimal(15, 2)
+  currency    String                 @default("IDR") @db.VarChar(10)
+  status      SplitBillSessionStatus @default(OPEN)
+  notes       String?                @db.Text
+  createdAt   DateTime               @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  owner        UserAccount            @relation("SplitBillOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  participants SplitBillParticipant[]
+  shares       SplitBillShare[]
+
+  @@map("split_bill_session")
+  @@index([ownerUserId], name: "idx_split_bill_session_owner_user_id")
+  @@index([status], name: "idx_split_bill_session_status")
+}
+
+/// Peserta split bill. Bisa terhubung ke akun user, atau guest tanpa akun (`userId = null`).
+model SplitBillParticipant {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId    String   @map("session_id") @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  displayName  String   @map("display_name") @db.VarChar(255)
+  isOwner      Boolean  @default(false) @map("is_owner")
+  joinedViaCode Boolean @default(false) @map("joined_via_code")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  session SplitBillSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    UserAccount?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shares  SplitBillShare[]
+
+  @@unique([sessionId, userId], name: "split_bill_participant_session_user_unique")
+  @@map("split_bill_participant")
+  @@index([sessionId], name: "idx_split_bill_participant_session_id")
+  @@index([userId], name: "idx_split_bill_participant_user_id")
+}
+
+/// Nominal tanggungan masing-masing participant di dalam satu session split bill.
+model SplitBillShare {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId     String   @map("session_id") @db.Uuid
+  participantId String   @map("participant_id") @db.Uuid
+  amount        Decimal  @db.Decimal(15, 2)
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  session     SplitBillSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participant SplitBillParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, participantId], name: "split_bill_share_session_participant_unique")
+  @@map("split_bill_share")
+  @@index([sessionId], name: "idx_split_bill_share_session_id")
+  @@index([participantId], name: "idx_split_bill_share_participant_id")
+}
+
+/// Satu session talangan / group expense untuk event, trip, atau monitoring pengeluaran bersama.
+model GroupExpenseSession {
+  id          String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerUserId String                    @map("owner_user_id") @db.Uuid
+  sessionCode String                    @unique @map("session_code") @db.VarChar(64)
+  title       String                    @db.VarChar(255)
+  currency    String                    @default("IDR") @db.VarChar(10)
+  status      GroupExpenseSessionStatus @default(ACTIVE)
+  notes       String?                   @db.Text
+  startedAt   DateTime?                 @map("started_at") @db.Timestamp()
+  endedAt     DateTime?                 @map("ended_at") @db.Timestamp()
+  createdAt   DateTime                  @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  owner               UserAccount                     @relation("GroupExpenseOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  participants        GroupExpenseParticipant[]
+  items               GroupExpenseItem[]
+  repayments          GroupExpenseRepayment[]
+  settlementSnapshots GroupExpenseSettlementSnapshot[]
+
+  @@map("group_expense_session")
+  @@index([ownerUserId], name: "idx_group_expense_session_owner_user_id")
+  @@index([status], name: "idx_group_expense_session_status")
+}
+
+/// Peserta group expense. Bisa user internal atau guest tanpa akun.
+model GroupExpenseParticipant {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId    String   @map("session_id") @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  displayName  String   @map("display_name") @db.VarChar(255)
+  isOwner      Boolean  @default(false) @map("is_owner")
+  joinedViaCode Boolean @default(false) @map("joined_via_code")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  session            GroupExpenseSession            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user               UserAccount?                   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  paidItems          GroupExpenseItem[]             @relation("GroupExpenseItemPaidBy")
+  itemShares         GroupExpenseItemShare[]
+  repaymentsSent     GroupExpenseRepayment[]        @relation("GroupExpenseRepaymentFrom")
+  repaymentsReceived GroupExpenseRepayment[]        @relation("GroupExpenseRepaymentTo")
+  settlementEntries  GroupExpenseSettlementEntry[]
+
+  @@unique([sessionId, userId], name: "group_expense_participant_session_user_unique")
+  @@map("group_expense_participant")
+  @@index([sessionId], name: "idx_group_expense_participant_session_id")
+  @@index([userId], name: "idx_group_expense_participant_user_id")
+}
+
+/// Setiap pengeluaran / talangan nyata di dalam sebuah session.
+model GroupExpenseItem {
+  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId           String                 @map("session_id") @db.Uuid
+  paidByParticipantId String                 @map("paid_by_participant_id") @db.Uuid
+  title               String                 @db.VarChar(255)
+  locationLabel       String?                @map("location_label") @db.VarChar(255)
+  amount              Decimal                @db.Decimal(15, 2)
+  currency            String                 @default("IDR") @db.VarChar(10)
+  incurredAt          DateTime               @map("incurred_at") @db.Timestamp()
+  notes               String?                @db.Text
+  splitMode           GroupExpenseSplitMode  @default(EQUAL) @map("split_mode")
+  status              GroupExpenseItemStatus @default(ACTIVE)
+  createdAt           DateTime               @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  session           GroupExpenseSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  paidByParticipant GroupExpenseParticipant @relation("GroupExpenseItemPaidBy", fields: [paidByParticipantId], references: [id], onDelete: Restrict)
+  shares            GroupExpenseItemShare[]
+
+  @@map("group_expense_item")
+  @@index([sessionId], name: "idx_group_expense_item_session_id")
+  @@index([paidByParticipantId], name: "idx_group_expense_item_paid_by_participant_id")
+  @@index([incurredAt], name: "idx_group_expense_item_incurred_at")
+}
+
+/// Share nominal per participant untuk satu expense item.
+model GroupExpenseItemShare {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  itemId        String   @map("item_id") @db.Uuid
+  participantId String   @map("participant_id") @db.Uuid
+  amount        Decimal  @db.Decimal(15, 2)
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  item        GroupExpenseItem        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  participant GroupExpenseParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, participantId], name: "group_expense_item_share_item_participant_unique")
+  @@map("group_expense_item_share")
+  @@index([itemId], name: "idx_group_expense_item_share_item_id")
+  @@index([participantId], name: "idx_group_expense_item_share_participant_id")
+}
+
+/// Pembayaran balik antar participant di dalam session yang sama.
+model GroupExpenseRepayment {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId         String   @map("session_id") @db.Uuid
+  fromParticipantId String   @map("from_participant_id") @db.Uuid
+  toParticipantId   String   @map("to_participant_id") @db.Uuid
+  amount            Decimal  @db.Decimal(15, 2)
+  currency          String   @default("IDR") @db.VarChar(10)
+  paidAt            DateTime @map("paid_at") @db.Timestamp()
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  session         GroupExpenseSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fromParticipant GroupExpenseParticipant @relation("GroupExpenseRepaymentFrom", fields: [fromParticipantId], references: [id], onDelete: Restrict)
+  toParticipant   GroupExpenseParticipant @relation("GroupExpenseRepaymentTo", fields: [toParticipantId], references: [id], onDelete: Restrict)
+
+  @@map("group_expense_repayment")
+  @@index([sessionId], name: "idx_group_expense_repayment_session_id")
+  @@index([fromParticipantId], name: "idx_group_expense_repayment_from_participant_id")
+  @@index([toParticipantId], name: "idx_group_expense_repayment_to_participant_id")
+}
+
+/// Snapshot finalisasi atau checkpoint settlement pada satu waktu tertentu.
+model GroupExpenseSettlementSnapshot {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId       String   @map("session_id") @db.Uuid
+  createdByUserId String   @map("created_by_user_id") @db.Uuid
+  label           String?  @db.VarChar(255)
+  snapshotAt      DateTime @default(now()) @map("snapshot_at") @db.Timestamp()
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  session       GroupExpenseSession           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdByUser UserAccount                   @relation("GroupExpenseSettlementCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  entries       GroupExpenseSettlementEntry[]
+
+  @@map("group_expense_settlement_snapshot")
+  @@index([sessionId], name: "idx_group_expense_settlement_snapshot_session_id")
+}
+
+/// Baris hasil settlement untuk satu participant pada sebuah snapshot.
+model GroupExpenseSettlementEntry {
+  id            String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  snapshotId    String                     @map("snapshot_id") @db.Uuid
+  participantId String                     @map("participant_id") @db.Uuid
+  netAmount     Decimal                    @map("net_amount") @db.Decimal(15, 2)
+  role          GroupExpenseSettlementRole
+  createdAt     DateTime                   @default(now()) @map("created_at") @db.Timestamp()
+
+  snapshot    GroupExpenseSettlementSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  participant GroupExpenseParticipant        @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([snapshotId, participantId], name: "group_expense_settlement_entry_snapshot_participant_unique")
+  @@map("group_expense_settlement_entry")
+  @@index([snapshotId], name: "idx_group_expense_settlement_entry_snapshot_id")
+  @@index([participantId], name: "idx_group_expense_settlement_entry_participant_id")
+}
+
+/// Template tagihan bulanan (fixed recurring). Instance per bulan ada di `Bill`.
+model RecurringBillSeries {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  name         String   @db.VarChar(255)
+  amount       Decimal  @db.Decimal(15, 2)
+  /// Tanggal jatuh tempo dalam bulan (1–31; untuk Februari akan dipetakan ke hari terakhir yang valid).
+  dayOfMonth   Int      @map("day_of_month")
+  isActive     Boolean  @default(true) @map("is_active")
+  notes        String?  @db.Text
+  /// Kategori pengeluaran (EXPENSE) — diteruskan ke setiap instance tagihan bulanan.
+  categoryId   String?  @map("category_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  user     UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  bills    Bill[]
+
+  @@map("recurring_bill_series")
+  @@index([userId], name: "idx_recurring_series_user_id")
+  @@index([isActive], name: "idx_recurring_series_active")
+  @@index([categoryId], name: "idx_recurring_series_category_id")
+}
+
+/// Satu baris = satu tagihan pada satu tanggal jatuh tempo (sekali bayar atau dari seri bulanan).
+model Bill {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId  String     @map("user_id") @db.Uuid
+  seriesId String?   @map("series_id") @db.Uuid
+  name      String    @db.VarChar(255)
+  amount    Decimal   @db.Decimal(15, 2)
+  dueDate   DateTime  @map("due_date") @db.Date
+  status    BillStatus @default(UNPAID)
+  paidAt    DateTime? @map("paid_at") @db.Timestamp()
+  notes     String?   @db.Text
+  /// Kategori pengeluaran (EXPENSE) saat tagihan dibayar — dipakai untuk transaksi otomatis.
+  categoryId String?  @map("category_id") @db.Uuid
+  /// Pengeluaran yang dibuat otomatis saat tagihan ditandai lunas (saldo dompet ikut berkurang lewat transaksi ini).
+  expenseTransactionId String? @unique @map("expense_transaction_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+
+  user   UserAccount        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series RecurringBillSeries? @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  expenseTransaction ExpenseTransaction? @relation("BillExpense", fields: [expenseTransactionId], references: [id], onDelete: SetNull)
+
+  @@map("bill")
+  @@index([userId], name: "idx_bill_user_id")
+  @@index([userId, dueDate], name: "idx_bill_user_due_date")
+  @@index([userId, status], name: "idx_bill_user_status")
+  @@index([seriesId], name: "idx_bill_series_id")
+  @@index([categoryId], name: "idx_bill_category_id")
+}
